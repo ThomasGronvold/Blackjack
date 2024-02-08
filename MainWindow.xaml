@@ -25,6 +25,8 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
+
+
             <!-- <Image Name="DealerCard1" Source="/Images/4_of_diamonds.png" Grid.Column="1" Height="250">                     -->
             <!--     <Image.RenderTransform>                                                                                    -->
             <!--         <RotateTransform Angle="3"/>                                                                           -->

@@ -17,36 +17,57 @@ public static class GameManager
     public static void Initialize(MainWindow mainWindow)
     {
         _mainWindow = mainWindow;
-
-
-
         StartGame();
     }
 
     private static void StartGame()
     {
-        Console.WriteLine("Test");
         // Player is dealt one card
-
-        var player1Card = Deck.GetNextCard();
-        _mainWindow.DealCard(player1Card);
+        HitPlayer();
 
         //Dealer is dealt one card face down
-        var dealer1Card = Deck.GetNextCard();
-        _mainWindow.DealCard(dealer1Card, true);
+        HitDealer(true);
 
-        // Player is dealth card number 2
-        var player2Card = Deck.GetNextCard();
-        _mainWindow.DealCard(player2Card);
+        // Player is dealt card number 2
+        HitPlayer();
 
         // dealer is dealt card number 2
-        var dealer2Card = Deck.GetNextCard();
-        _mainWindow.DealCard(dealer2Card, true);
+        HitDealer();
     }
 
-    private static void HitPlayer()
+    private static void PlayerLogic()
     {
-        // Logic to give an additional card to the player
+        if (Player.HasBlackjack())
+        {
+            /* Call a method from the window to visually show the blackjack win */
+            /* Later on update Database with player win and blackjack statistics */
+        }
+
+        if (GameManager.Player.CardsSum > 21)
+        {
+            /* Call a method from the window to visually show the player bust */
+            /* Later on update Database with player Loss */
+            Console.WriteLine("yo");
+        }
+        else
+        {
+            //Console.WriteLine("HAHAH");
+        }
+    }
+
+    public static void HitPlayer()
+    {
+        Card newCard = Deck.GetNextCard();
+        Player.AddCard(newCard);
+        _mainWindow.DealCard(newCard);
+        PlayerLogic();
+    }
+
+    private static void HitDealer(bool isFaceDown = false)
+    {
+        Card newCard = Deck.GetNextCard();
+        Dealer.AddCard(newCard);
+        _mainWindow.DealCard(newCard, true, isFaceDown);
     }
 
     private static void StandPlayer()

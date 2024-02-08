@@ -1,4 +1,7 @@
-﻿namespace WPFBlackjack;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.JavaScript;
+
+namespace WPFBlackjack;
 
 using System.Collections.Generic;
 using System;
@@ -19,7 +22,7 @@ public static class Deck
         _cards = new List<Card>();
 
         string[] suits = { "Hearts", "Diamonds", "Clubs", "Spades" };
-        string[] values = { "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
+        string[] values = { /*"2", "3", "4", "5", "6", "7", "8", "9", "10",*/ "J", "Q", "K", "A" };
 
         var cardList =
             from suit in suits
@@ -41,6 +44,8 @@ public static class Deck
             int k = rng.Next(n--);
             (_cards[n], _cards[k]) = (_cards[k], _cards[n]);
         }
+
+        _nextCardIndex = 0;
     }
 
     public static Card GetNextCard()
