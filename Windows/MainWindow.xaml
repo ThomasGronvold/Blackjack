@@ -43,7 +43,7 @@
         </Grid>
 
         <!-- Action Grid-Row -->
-        <Grid Grid.Row="1" Height="70">
+        <Grid Name="ActionGrid" Grid.Row="1" Height="70">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -59,17 +59,17 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Button Content="Double" Width="120" Height="70" FontSize="30"/>
+                <Button Content="Double" Width="120" Height="70" FontSize="30"  Click="DoubleButtonBase_OnClick"/>
                 <TextBlock Text="$100" FontSize="30" Grid.Column="1" TextAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
 
             <Button Content="Split" Grid.Column="2" Width="120" Height="70" FontSize="30" Margin="0 0 300 0" Visibility="Hidden"/>
-            <Button Content="Stand" Grid.Column="2" Width="120" Height="70" FontSize="30"/>
+            <Button Content="Stand" Grid.Column="2" Width="120" Height="70" FontSize="30" Click="StandButtonBase_OnClick"/>
         </Grid>
 
 
         <!-- Player Grid-Row -->
-        <Grid Grid.Row="2" Name="PlayerGrid" ShowGridLines="True">
+        <Grid Grid.Row="2" Name="PlayerGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -90,12 +90,25 @@
                 <!--             <RotateTransform Angle="-2"/>                                                                            -->
                 <!--         </Image.RenderTransform>                                                                                     -->
                 <!--     </Image>                                                                                                         -->
-            </Grid>
 
+                <TextBlock
+                    Name="GameOverSubText"
+                    FontSize="50"
+                    HorizontalAlignment="Center"
+                />
+            </Grid>
 
             <TextBlock Name="PlayerCardCount" Text="15 Player" Grid.Column="2" FontSize="60" VerticalAlignment="Center"/>
         </Grid>
 
+        <!-- Wil show when user wins -->
+        <Grid Grid.Row="1" Grid.Column="0">
+            <TextBlock
+                Name="GameOverMainText"
+                FontSize="60" 
+                HorizontalAlignment="Center" 
+            />
+        </Grid>
     </Grid>
 
 </Window>

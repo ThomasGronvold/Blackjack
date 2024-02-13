@@ -31,7 +31,9 @@ namespace WPFBlackjack
             GameManager.Initialize(this);
         }
 
-        public void DealCard(Card card, bool dealer = false, bool isFaceDown = false)
+        /* Public Methods */
+
+        public void DealCard(Card card, bool dealer, bool isFaceDown, int cardsSum)
         {
             /* Creates and returns an Image element with the correct properties. */
             var dynamicImage = CreateDynamicImage(card, isFaceDown);
@@ -42,28 +44,39 @@ namespace WPFBlackjack
             if (dealer)
             {
                 MoveExistingCards(DealerGrid);
-                DealerCardCount.Text = $"{GameManager.Dealer.CardsSum.ToString()} Dealer";
+                DealerCardCount.Text = $"{cardsSum} Dealer";
                 DealerGrid.Children.Add(dynamicImage);
             }
             else
             {
                 MoveExistingCards(PlayerCards);
-                PlayerCardCount.Text = $"{GameManager.Player.CardsSum.ToString()} Player";
+                PlayerCardCount.Text = $"{cardsSum} Player";
                 PlayerCards.Children.Add(dynamicImage);
             }
         }
 
+        public void GameResultScreen(string whoWon, string result = "")
+        {
+            var isTie = whoWon == "Tie";
+            GameOverMainText.Text = isTie ? "Tie!" : $"{whoWon} Won!";
+            GameOverSubText.Text = isTie ? "It's a push." : $"{result}";
+
+            ActionGrid.Visibility = Visibility.Hidden;
+        }
+
+        /* Private Methods */
+
         private static Image CreateDynamicImage(Card card, bool isFaceDown = false)
         {
             // Create a new BitmapImage
-            string imgUrl = card.GetCardImg();
+            var imgUrl = card.GetCardImg();
             var newImage = isFaceDown
                 ? new BitmapImage(new Uri("/Images/Cardback.png", UriKind.Relative))
                 : new BitmapImage(new Uri($"{imgUrl}", UriKind.Relative));
 
             // Create a new Image element
-            Random random = new Random();
-            int tilt = random.Next(-5, 5);
+            var random = new Random();
+            var tilt = random.Next(-5, 5);
             var dynamicImage = new Image
             {
                 Source = newImage,
@@ -86,20 +99,40 @@ namespace WPFBlackjack
 
             foreach (var cardImage in cardImageElements)
             {
-                Thickness existingMargin = cardImage.Margin;
-                double newRight = existingMargin.Right + 55.0;
-                Thickness newMargin = new Thickness(existingMargin.Left, existingMargin.Top, newRight,
+                var existingMargin = cardImage.Margin;
+                var newRight = existingMargin.Right + 55.0;
+                var newMargin = new Thickness(existingMargin.Left, existingMargin.Top, newRight,
                     existingMargin.Bottom);
                 cardImage.Margin = newMargin;
             }
+        }
+        private void DealerShowCard()
+        {
+            var dealerHiddenCard = DealerGrid.Children[1] as Image;
+            var tempIRI = GameManager.GetDealerHiddenCardURL();
+            dealerHiddenCard.Source = new BitmapImage(new Uri(tempIRI, UriKind.RelativeOrAbsolute));
         }
 
         // Button clicks methods
         private void HitBtn_OnClick(object sender, RoutedEventArgs e)
         {
-            /* HitPlayer method adds a card and validates the state of the game,
+            /* HitParticipant method adds a card and validates the state of the game,
              then calls the DealCard method here in window to show the card and update the (visual) value*/
-            GameManager.HitPlayer();
+            GameManager.HitParticipant();
+        }
+
+        private void DoubleButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            ActionGrid.Visibility = Visibility.Hidden;
+            GameOverMainText.Text = "Player Won!";
+            GameOverSubText.Text = "The Dealer Busted!";
+        }
+
+        private void StandButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            DealerShowCard();
+            ActionGrid.Visibility = Visibility.Hidden;
+            GameManager.DealerTurn();
         }
     }
 }

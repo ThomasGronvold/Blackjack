@@ -10,7 +10,6 @@ public class Card
     public string FaceCardIdentity { get; private set; }
     public int Value { get; private set; }
 
-
     public Card(string suit, string value)
     {
         Suit = suit;
@@ -47,6 +46,4 @@ public class Card
     {
         Value = 1;
     }
-
-
 }
