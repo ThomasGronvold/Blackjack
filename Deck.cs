@@ -22,7 +22,10 @@ public static class Deck
         _cards = new List<Card>();
 
         string[] suits = { "Hearts", "Diamonds", "Clubs", "Spades" };
-        string[] values = { "2", "3", "4", "5", "6", "7", "8", "9", "10", /*"J", "Q",*/ "K", "A" };
+        string[] values =
+        {
+            /*"2", "3", "4", "5", "6", "7", "8", "9",*/ "10", "J", "Q", "K", "A"
+        };
 
         var cardList =
             from suit in suits
@@ -34,10 +37,14 @@ public static class Deck
         ShuffleDeck();
     }
 
-    private static void ShuffleDeck()
+    public static void ShuffleDeck()
     {
-        int n = _cards.Count;
-        Random rng = new Random();
+        _cards.Where(c => c is { FaceCardIdentity: "A", Value: 1 })
+            .ToList()
+            .ForEach(c => c.ChangeAceValue());
+
+        var n = _cards.Count;
+        Random rng = new();
 
         while (n > 1)
         {
@@ -52,6 +59,12 @@ public static class Deck
     {
         Card cardToReturn = _cards[_nextCardIndex];
         _nextCardIndex++;
+
+        if (_nextCardIndex >= _cards.Count)
+        {
+            ShuffleDeck();
+        }
+
         return cardToReturn;
     }
 }

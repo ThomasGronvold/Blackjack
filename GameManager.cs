@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -11,38 +12,48 @@ namespace WPFBlackjack;
 public static class GameManager
 {
     private static MainWindow _mainWindow;
-    private static GameParticipant Dealer = new();
-    private static GameParticipant Player = new();
+    private static readonly GameParticipant Dealer = new();
+    private static readonly GameParticipant Player = new();
 
     public static void Initialize(MainWindow mainWindow)
     {
         _mainWindow = mainWindow;
+        ResetGame();
         StartGame();
     }
 
     /* Initialization Method */
+
+    private static void ResetGame()
+    {
+        Player.ResetParticipant();
+        Dealer.ResetParticipant();
+        Deck.ShuffleDeck();
+    }
 
     private static void StartGame()
     {
         // Player and Dealer is alternately dealt two cards each, starting with player
 
         // Player's First Card 
-        HitParticipant();
+        HitParticipant(shouldCheckWin: false);
 
         // Dealer's first card (isDealer, starts facing down) 
-        HitParticipant(true, true);
+        HitParticipant(true, true, shouldCheckWin: false);
 
         // Player's second card 
-        HitParticipant();
+        HitParticipant(shouldCheckWin: false);
 
         // Dealer's second card (isDealer)
-        HitParticipant(true);
+        HitParticipant(true, shouldCheckWin: false);
+
+        CheckBlackjack();
     }
 
     /* Public Methods */
 
     /* Make method work for all participants */
-    public static void HitParticipant(bool isDealer = false, bool isFaceDown = false)
+    public static void HitParticipant(bool isDealer = false, bool isFaceDown = false, bool shouldCheckWin = true)
     {
         var participant = isDealer ? Dealer : Player;
         var opponent = participant == Player ? Dealer : Player;
@@ -51,20 +62,21 @@ public static class GameManager
 
         participant.AddCard(newCard, isDealer);
 
-        var cardSum = participant.CardsSum;
+        var cardSum = isDealer && !shouldCheckWin ? newCard.Value : participant.CardsSum;
 
         /* The new card get added and displayed to the Window */
         _mainWindow.DealCard(newCard, isDealer, isFaceDown, cardSum);
 
-        if (participant.HasGameInitialized() && opponent.HasGameInitialized())
+        if (shouldCheckWin)
         {
             CheckGameOver(participant, opponent);
         }
     }
 
-    public static string GetDealerHiddenCardURL()
+    public static string GetDealerHiddenCard()
     {
-        return Dealer.DealerHiddenCardUrl();
+        _mainWindow.DealerCardCount.Text = $"{Dealer.CardsSum} Dealer";
+        return Dealer.DealerHiddenCard();
     }
 
     /* Private Methods */
@@ -74,21 +86,8 @@ public static class GameManager
         var currentParticipantString = participant == Player ? "Player" : "Dealer";
         var opponentParticipantString = participant == Player ? "Dealer" : "Player";
 
-        if (participant.HasBlackjack())
-        {
-            // if both players has blackjack it's a 
-            if (opponent.HasBlackjack())
-            {
-                GameResultPush();
-            }
-            else
-            {
-                GameResultBlackjack(currentParticipantString);
-            }
-        }
-
-        // if a participants CardsSum after drawing a card is over 21 the participant busts
-        else if (participant.CardsSum > 21)
+        // if a participants CardsSum after drawing a card is over 21 the participant busts.
+        if (participant.CardsSum > 21)
         {
             GameResultBust(opponentParticipantString, currentParticipantString);
         }
@@ -106,14 +105,39 @@ public static class GameManager
         }
     }
 
+    private static void CheckBlackjack()
+    {
+        // if both players has blackjack it's a push.
+        if (Player.HasBlackjack() && Dealer.HasBlackjack())
+        {
+            GameResultPush();
+        }
+        // Check for Blackjack in both Player and Dealer hands.
+        else if (Player.HasBlackjack())
+        {
+            GameResultBlackjack("Player");
+        }
+        else if (Dealer.HasBlackjack())
+        {
+            GameResultBlackjack("Dealer");
+        }
+    }
+
     public static void DealerTurn()
     {
         // The dealers first card should be flipped, and the dealer cardValue should be updated
-
-        while (Dealer.CardsSum < 17)
+        if (Dealer.CardsSum < 17)
         {
-            HitParticipant(true);
+            while (Dealer.CardsSum < 17)
+            {
+                HitParticipant(true);
+            }
         }
+        else
+        {
+            GameResult();
+        }
+
     }
 
     /* Game Result Methods */
@@ -122,7 +146,11 @@ public static class GameManager
     // Checks the cardSum of the player and dealer, the higher sum wins. 
     private static void GameResult()
     {
-        if (Player.CardsSum > Dealer.CardsSum)
+        if (Player.CardsSum == Dealer.CardsSum)
+        {
+            GameResultPush();
+        }
+        else if (Player.CardsSum > Dealer.CardsSum)
         {
             _mainWindow.GameResultScreen("Player", "The Player Won!");
         }

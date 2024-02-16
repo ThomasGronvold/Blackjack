@@ -17,7 +17,7 @@ public class Card
         Value = GetCardIntValue(value);
     }
 
-    public int GetCardIntValue(string value)
+    public static int GetCardIntValue(string value)
     {
         if (value == "A")
         {
@@ -44,6 +44,6 @@ public class Card
 
     public void ChangeAceValue()
     {
-        Value = 1;
+        Value = Value == 11 ? 1 : 11;
     }
 }

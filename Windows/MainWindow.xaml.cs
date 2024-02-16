@@ -33,7 +33,7 @@ namespace WPFBlackjack
 
         /* Public Methods */
 
-        public void DealCard(Card card, bool dealer, bool isFaceDown, int cardsSum)
+        public void DealCard(Card card, bool isDealer, bool isFaceDown, int cardsSum)
         {
             /* Creates and returns an Image element with the correct properties. */
             var dynamicImage = CreateDynamicImage(card, isFaceDown);
@@ -41,27 +41,36 @@ namespace WPFBlackjack
             /* Dependent on turn, Already existing cards will be moved to make space
                for the new card, The value count of the cards will be updated,
                And the new Card will be added. */
-            if (dealer)
+            if (isDealer)
             {
-                MoveExistingCards(DealerGrid);
+                MoveExistingCards(DealerCardGrid);
                 DealerCardCount.Text = $"{cardsSum} Dealer";
-                DealerGrid.Children.Add(dynamicImage);
+                DealerCardGrid.Children.Add(dynamicImage);
             }
             else
             {
-                MoveExistingCards(PlayerCards);
+                MoveExistingCards(PlayerCardGrid);
                 PlayerCardCount.Text = $"{cardsSum} Player";
-                PlayerCards.Children.Add(dynamicImage);
+                PlayerCardGrid.Children.Add(dynamicImage);
+
+                if (cardsSum == 21)
+                {
+                    EndPlayerTurn();
+                }
             }
         }
 
         public void GameResultScreen(string whoWon, string result = "")
         {
+            DealerShowCard();
+
+            ActionGrid.Visibility = Visibility.Hidden;
+
             var isTie = whoWon == "Tie";
             GameOverMainText.Text = isTie ? "Tie!" : $"{whoWon} Won!";
             GameOverSubText.Text = isTie ? "It's a push." : $"{result}";
 
-            ActionGrid.Visibility = Visibility.Hidden;
+            NewHandBtn.Visibility = Visibility.Visible;
         }
 
         /* Private Methods */
@@ -91,7 +100,7 @@ namespace WPFBlackjack
 
         /* Moves existing cards to the left so that a new card can have the correct spot
            without blocking the view of the other cards. */
-        private void MoveExistingCards(Grid cardsToMove)
+        private static void MoveExistingCards(Grid cardsToMove)
         {
             var cardImageElements = LogicalTreeHelper
                 .GetChildren(cardsToMove)
@@ -106,11 +115,19 @@ namespace WPFBlackjack
                 cardImage.Margin = newMargin;
             }
         }
+
         private void DealerShowCard()
         {
-            var dealerHiddenCard = DealerGrid.Children[1] as Image;
-            var tempIRI = GameManager.GetDealerHiddenCardURL();
-            dealerHiddenCard.Source = new BitmapImage(new Uri(tempIRI, UriKind.RelativeOrAbsolute));
+            var dealerHiddenCardImage = DealerCardGrid.Children[0] as Image;
+            var dealerHiddenCard = GameManager.GetDealerHiddenCard();
+            dealerHiddenCardImage!.Source = new BitmapImage(new Uri(dealerHiddenCard, UriKind.RelativeOrAbsolute));
+        }
+
+        private void EndPlayerTurn()
+        {
+            DealerShowCard();
+            ActionGrid.Visibility = Visibility.Hidden;
+            GameManager.DealerTurn();
         }
 
         // Button clicks methods
@@ -130,9 +147,25 @@ namespace WPFBlackjack
 
         private void StandButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            DealerShowCard();
-            ActionGrid.Visibility = Visibility.Hidden;
-            GameManager.DealerTurn();
+            EndPlayerTurn();
+        }
+
+        private void NewHandButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            // Clear the player's and dealer's cards in the window.
+            PlayerCardGrid.Children.Clear();
+            DealerCardGrid.Children.Clear();
+
+            // Clear the GameResult text and hide the new game button.
+            GameOverMainText.Text = "";
+            GameOverSubText.Text = "";
+            NewHandBtn.Visibility = Visibility.Hidden;
+
+            // Make the ActionGrid visible again.
+            ActionGrid.Visibility = Visibility.Visible;
+
+            // Reinitialize GameManager
+            GameManager.Initialize(this);
         }
     }
 }

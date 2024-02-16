@@ -12,13 +12,13 @@
             <!-- DealerRow -->
             <RowDefinition />
             <!-- Action Row -->
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
             <!-- PlayerRow -->
             <RowDefinition />
         </Grid.RowDefinitions>
 
         <!-- Dealer Grid-Row -->
-        <Grid Name="DealerGrid">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -26,20 +26,21 @@
             </Grid.ColumnDefinitions>
 
 
+            <Grid Column="1" Name="DealerCardGrid">
+                <!-- <Image Name="DealerCard1" Source="/Images/4_of_diamonds.png" Grid.Column="1" Height="250">                     -->
+                <!--     <Image.RenderTransform>                                                                                    -->
+                <!--         <RotateTransform Angle="3"/>                                                                           -->
+                <!--     </Image.RenderTransform>                                                                                   -->
+                <!-- </Image>                                                                                                       -->
+                <!--                                                                                                                -->
+                <!-- <Image Name="DealerCard2" Source="/Images/k_of_spades.png" Grid.Column="1" Height="250" Margin="0 10 -60 0">   -->
+                <!--     <Image.RenderTransform>                                                                                    -->
+                <!--         <RotateTransform Angle="-2"/>                                                                          -->
+                <!--     </Image.RenderTransform>                                                                                   -->
+                <!-- </Image>                                                                                                       -->
+            </Grid>
 
-            <!-- <Image Name="DealerCard1" Source="/Images/4_of_diamonds.png" Grid.Column="1" Height="250">                     -->
-            <!--     <Image.RenderTransform>                                                                                    -->
-            <!--         <RotateTransform Angle="3"/>                                                                           -->
-            <!--     </Image.RenderTransform>                                                                                   -->
-            <!-- </Image>                                                                                                       -->
-            <!--                                                                                                                -->
-            <!-- <Image Name="DealerCard2" Source="/Images/k_of_spades.png" Grid.Column="1" Height="250" Margin="0 10 -60 0">   -->
-            <!--     <Image.RenderTransform>                                                                                    -->
-            <!--         <RotateTransform Angle="-2"/>                                                                          -->
-            <!--     </Image.RenderTransform>                                                                                   -->
-            <!-- </Image>                                                                                                       -->
-
-            <TextBlock Name="DealerCardCount" Text="14 Dealer" Grid.Column="2" FontSize="60" VerticalAlignment="Center"/>
+            <TextBlock Name="DealerCardCount" Text="14 Dealer" Grid.Column="2" FontSize="60" VerticalAlignment="Center" />
         </Grid>
 
         <!-- Action Grid-Row -->
@@ -50,7 +51,7 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <Button Content="Hit" Width="120" Height="70" FontSize="30" Click="HitBtn_OnClick"/>
+            <Button Content="Hit" Width="120" Height="70" FontSize="30" Click="HitBtn_OnClick" />
 
 
             <Grid Grid.Column="1">
@@ -59,26 +60,30 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Button Content="Double" Width="120" Height="70" FontSize="30"  Click="DoubleButtonBase_OnClick"/>
-                <TextBlock Text="$100" FontSize="30" Grid.Column="1" TextAlignment="Center" VerticalAlignment="Center"/>
+                <Button Content="Double" Width="120" Height="70" FontSize="30" Click="DoubleButtonBase_OnClick" />
+                <TextBlock Text="$100" FontSize="30" Grid.Column="1" TextAlignment="Center" VerticalAlignment="Center" />
             </Grid>
 
-            <Button Content="Split" Grid.Column="2" Width="120" Height="70" FontSize="30" Margin="0 0 300 0" Visibility="Hidden"/>
-            <Button Content="Stand" Grid.Column="2" Width="120" Height="70" FontSize="30" Click="StandButtonBase_OnClick"/>
+            <Button Content="Split" Grid.Column="2" Width="120" Height="70" FontSize="30" Margin="0 0 300 0"
+                    Visibility="Hidden" />
+            <Button Content="Stand" Grid.Column="2" Width="120" Height="70" FontSize="30"
+                    Click="StandButtonBase_OnClick" />
         </Grid>
 
 
         <!-- Player Grid-Row -->
-        <Grid Grid.Row="2" Name="PlayerGrid">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Bank: $900" FontSize="60" VerticalAlignment="Bottom" Margin="20 0 0 0"/>
+            <TextBlock Text="Bank: $900" FontSize="60" VerticalAlignment="Bottom" Margin="20 0 0 0" />
+            <Button Name="NewHandBtn" Content="New Hand" Click="NewHandButtonBase_OnClick" Grid.Column="0" Height="100"
+                    Width="200" FontSize="35" Visibility="Hidden" />
 
-            <Grid Column="1" Name="PlayerCards">
+            <Grid Column="1" Name="PlayerCardGrid">
                 <!--     <Image Name="PlayerCard1" Source="/Images/10_of_clubs.png" Grid.Column="1" Height="250">                         -->
                 <!--         <Image.RenderTransform>                                                                                      -->
                 <!--             <RotateTransform Angle="5"/>                                                                             -->
@@ -90,24 +95,23 @@
                 <!--             <RotateTransform Angle="-2"/>                                                                            -->
                 <!--         </Image.RenderTransform>                                                                                     -->
                 <!--     </Image>                                                                                                         -->
-
-                <TextBlock
-                    Name="GameOverSubText"
-                    FontSize="50"
-                    HorizontalAlignment="Center"
-                />
             </Grid>
 
-            <TextBlock Name="PlayerCardCount" Text="15 Player" Grid.Column="2" FontSize="60" VerticalAlignment="Center"/>
+            <TextBlock
+                Grid.Column="1"
+                Name="GameOverSubText"
+                FontSize="50"
+                HorizontalAlignment="Center" />
+
+            <TextBlock Name="PlayerCardCount" Text="15 Player" Grid.Column="2" FontSize="60" VerticalAlignment="Center" />
         </Grid>
 
         <!-- Wil show when user wins -->
         <Grid Grid.Row="1" Grid.Column="0">
             <TextBlock
                 Name="GameOverMainText"
-                FontSize="60" 
-                HorizontalAlignment="Center" 
-            />
+                FontSize="60"
+                HorizontalAlignment="Center" />
         </Grid>
     </Grid>
 

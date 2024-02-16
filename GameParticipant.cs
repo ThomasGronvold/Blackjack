@@ -6,7 +6,7 @@ namespace WPFBlackjack;
 
 public class GameParticipant
 {
-    private List<Card> _hand = new();
+    private readonly List<Card> _hand = new();
     public int CardsSum { get; private set; }
 
     /* Public Methods */
@@ -29,23 +29,7 @@ public class GameParticipant
 
     public bool HasBlackjack()
     {
-        if (_hand.Count == 2)
-        {
-            var anyAces = _hand.Any(c => c.FaceCardIdentity == "A");
-            var anyFaceCards = _hand.Any(c => c.FaceCardIdentity is "J" or "Q" or "K");
-
-            if (anyAces && anyFaceCards)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public bool HasGameInitialized()
-    {
-        if (_hand.Count >= 2)
+        if (_hand.Count == 2 && CardsSum == 21)
         {
             return true;
         }
@@ -53,16 +37,22 @@ public class GameParticipant
         return false;
     }
 
-    public string DealerHiddenCardUrl()
+    public string DealerHiddenCard()
     {
         return _hand[0].GetCardImg();
+    }
+
+    public void ResetParticipant()
+    {
+        _hand.Clear();
+        CardsSum = 0;
     }
 
     /* Private Methods */
     private void AdjustAceValueIfBusted()
     {
-        Card firstAceWithFullValue =
-            _hand.FirstOrDefault(card => card.FaceCardIdentity == "A" && card.Value != 1);
+        var firstAceWithFullValue =
+            _hand.FirstOrDefault(card => card.FaceCardIdentity == "A" && card.Value != 1)!;
 
         if (CardsSum > 21 && firstAceWithFullValue != null)
         {
@@ -74,16 +64,7 @@ public class GameParticipant
 
     private void CalculateCardsSum(bool isDealer = false)
     {
-        /* If there are 2 cards in dealers hand it means the Players round is not over
-           and the first card the dealer has gotten should be hidden, and so should the value. */
-        if (!(isDealer && _hand.Count == 2))
-        {
-            CardsSum =
-                _hand.Sum(x => x.Value);
-        }
-        else
-        {
-            CardsSum = _hand[1].Value;
-        }
+        CardsSum =
+            _hand.Sum(x => x.Value);
     }
 }
