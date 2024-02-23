@@ -1,21 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using static System.Net.Mime.MediaTypeNames;
 using Image = System.Windows.Controls.Image;
 
 namespace WPFBlackjack
@@ -25,10 +13,13 @@ namespace WPFBlackjack
     /// </summary>
     public partial class MainWindow
     {
+        private int _tempBankAmount = 1000;
+        private int _tempPotAmount;
+
         public MainWindow()
         {
             InitializeComponent();
-            GameManager.Initialize(this);
+            //GameManager.Initialize(this);
         }
 
         /* Public Methods */
@@ -52,11 +43,6 @@ namespace WPFBlackjack
                 MoveExistingCards(PlayerCardGrid);
                 PlayerCardCount.Text = $"{cardsSum} Player";
                 PlayerCardGrid.Children.Add(dynamicImage);
-
-                if (cardsSum == 21)
-                {
-                    EndPlayerTurn();
-                }
             }
         }
 
@@ -70,7 +56,36 @@ namespace WPFBlackjack
             GameOverMainText.Text = isTie ? "Tie!" : $"{whoWon} Won!";
             GameOverSubText.Text = isTie ? "It's a push." : $"{result}";
 
+            // Tie
+            if (whoWon == "Tie")
+            {
+                _tempBankAmount += _tempPotAmount;
+            }
+            // Blackjack win
+            else if (whoWon == "Player" && result == "Blackjack!")
+            {
+                Console.WriteLine("Blackjack");
+                _tempBankAmount += (int)(_tempPotAmount * 2.5);
+            }
+            // Normal win
+            else if (whoWon == "Player")
+            {
+                Console.WriteLine("Normal");
+                _tempBankAmount += _tempPotAmount * 2;
+            }
+
+            _tempPotAmount = 0;
+
+            UpdateBankAndBetTextBlocks();
+
             NewHandBtn.Visibility = Visibility.Visible;
+        }
+
+        public void EndPlayerTurn()
+        {
+            DealerShowCard();
+            ActionGrid.Visibility = Visibility.Hidden;
+            GameManager.DealerTurn();
         }
 
         /* Private Methods */
@@ -98,7 +113,7 @@ namespace WPFBlackjack
             return dynamicImage;
         }
 
-        /* Moves existing cards to the left so that a new card can have the correct spot
+        /* Moves existing cards to the left so that a new card can have the correct Bet
            without blocking the view of the other cards. */
         private static void MoveExistingCards(Grid cardsToMove)
         {
@@ -123,34 +138,61 @@ namespace WPFBlackjack
             dealerHiddenCardImage!.Source = new BitmapImage(new Uri(dealerHiddenCard, UriKind.RelativeOrAbsolute));
         }
 
-        private void EndPlayerTurn()
+        private void ChangeActiveGrid()
         {
-            DealerShowCard();
-            ActionGrid.Visibility = Visibility.Hidden;
-            GameManager.DealerTurn();
+            if (GameGrid.Visibility == Visibility.Visible)
+            {
+                GameGrid.Visibility = Visibility.Hidden;
+                BettingGrid.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                GameGrid.Visibility = Visibility.Visible;
+                BettingGrid.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void UpdateBankAndBetTextBlocks()
+        {
+            var bankAmount = $"Bank: ${_tempBankAmount}";
+            var betAmount = $"${_tempPotAmount}";
+
+            BankAmount.Text = bankAmount;
+            BankAmountBettingGrid.Text = bankAmount;
+
+            BetAmount.Text = betAmount;
+            BetAmountBettingGrid.Text = betAmount;
         }
 
         // Button clicks methods
-        private void HitBtn_OnClick(object sender, RoutedEventArgs e)
+        private void HitButton_OnClick(object sender, RoutedEventArgs e)
         {
             /* HitParticipant method adds a card and validates the state of the game,
              then calls the DealCard method here in window to show the card and update the (visual) value*/
             GameManager.HitParticipant();
+            DoubleButton.IsEnabled = false;
         }
 
-        private void DoubleButtonBase_OnClick(object sender, RoutedEventArgs e)
+        private void DoubleButton_OnClick(object sender, RoutedEventArgs e)
         {
-            ActionGrid.Visibility = Visibility.Hidden;
-            GameOverMainText.Text = "Player Won!";
-            GameOverSubText.Text = "The Dealer Busted!";
+            /* Gives a user a card with the isDouble parameter which makes the GameManager know the player's turn is over */
+            if (_tempBankAmount < _tempPotAmount) return;
+
+            // The bank amount is lowered by the pot amount, and the pot amount is doubled.
+            _tempBankAmount -= _tempPotAmount;
+            _tempPotAmount *= 2;
+
+            UpdateBankAndBetTextBlocks();
+
+            GameManager.HitParticipant(isDouble: true);
         }
 
-        private void StandButtonBase_OnClick(object sender, RoutedEventArgs e)
+        private void StandButton_OnClick(object sender, RoutedEventArgs e)
         {
             EndPlayerTurn();
         }
 
-        private void NewHandButtonBase_OnClick(object sender, RoutedEventArgs e)
+        private void NewHandButton_OnClick(object sender, RoutedEventArgs e)
         {
             // Clear the player's and dealer's cards in the window.
             PlayerCardGrid.Children.Clear();
@@ -164,8 +206,39 @@ namespace WPFBlackjack
             // Make the ActionGrid visible again.
             ActionGrid.Visibility = Visibility.Visible;
 
+            // Enable the double button
+            DoubleButton.IsEnabled = true;
+
             // Reinitialize GameManager
-            GameManager.Initialize(this);
+            ChangeActiveGrid();
+        }
+
+        private void BettingButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Button chipClicked = (Button)sender;
+            int chipValue = Convert.ToInt32(chipClicked.Tag);
+
+            // If chipValue is 0 it means the player cleared his bet amount. Bank and Bet will be the same as before the bet.
+            // If chipValue is 1 it means the player is ready to play, and the game will start.
+            if (chipValue == 0)
+            {
+                _tempBankAmount += _tempPotAmount;
+                _tempPotAmount = 0;
+            }
+            else if (chipValue == 1)
+            {
+                // Game start, betting grid gets hidden, and game grids becomes visible.
+                ChangeActiveGrid();
+
+                GameManager.Initialize(this);
+            }
+            else if (_tempBankAmount - chipValue >= 0)
+            {
+                _tempBankAmount -= chipValue;
+                _tempPotAmount += chipValue;
+            }
+
+            UpdateBankAndBetTextBlocks();
         }
     }
 }

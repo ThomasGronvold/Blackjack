@@ -11,7 +11,7 @@ public class GameParticipant
 
     /* Public Methods */
 
-    public void AddCard(Card newCard, bool isDealer)
+    public void AddCard(Card newCard)
     {
         _hand.Add(newCard);
 
@@ -19,7 +19,7 @@ public class GameParticipant
         {
             /* After card has been added to the hand, the sum of all cards in the hand is calculated
           And the CardsSum property is updated with the correct value */
-            CalculateCardsSum(isDealer);
+            CalculateCardsSum();
 
             /* If the sum of CardsSum is over 21, and the participant has an Ace with the value 11,
                the Ace will convert it's value into 1, to prevent the bust */
@@ -62,7 +62,7 @@ public class GameParticipant
         }
     }
 
-    private void CalculateCardsSum(bool isDealer = false)
+    private void CalculateCardsSum()
     {
         CardsSum =
             _hand.Sum(x => x.Value);

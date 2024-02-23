@@ -7,6 +7,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Documents;
 
+
 namespace WPFBlackjack;
 
 public static class GameManager
@@ -52,24 +53,26 @@ public static class GameManager
 
     /* Public Methods */
 
-    /* Make method work for all participants */
-    public static void HitParticipant(bool isDealer = false, bool isFaceDown = false, bool shouldCheckWin = true)
+    public static void HitParticipant(bool isDealer = false, bool isFaceDown = false, bool shouldCheckWin = true, bool isDouble = false)
     {
         var participant = isDealer ? Dealer : Player;
         var opponent = participant == Player ? Dealer : Player;
 
         var newCard = Deck.GetNextCard();
 
-        participant.AddCard(newCard, isDealer);
+        participant.AddCard(newCard);
 
         var cardSum = isDealer && !shouldCheckWin ? newCard.Value : participant.CardsSum;
 
         /* The new card get added and displayed to the Window */
         _mainWindow.DealCard(newCard, isDealer, isFaceDown, cardSum);
 
-        if (shouldCheckWin)
+        if (shouldCheckWin && !CheckGameOver(participant, opponent))
         {
-            CheckGameOver(participant, opponent);
+            if (!isDealer && cardSum == 21 || isDouble)
+            {
+                _mainWindow.EndPlayerTurn();
+            }
         }
     }
 
@@ -81,7 +84,7 @@ public static class GameManager
 
     /* Private Methods */
 
-    private static void CheckGameOver(GameParticipant participant, GameParticipant opponent)
+    private static bool CheckGameOver(GameParticipant participant, GameParticipant opponent)
     {
         var currentParticipantString = participant == Player ? "Player" : "Dealer";
         var opponentParticipantString = participant == Player ? "Dealer" : "Player";
@@ -90,19 +93,21 @@ public static class GameManager
         if (participant.CardsSum > 21)
         {
             GameResultBust(opponentParticipantString, currentParticipantString);
+            return true;
         }
-
         else if (
             participant.CardsSum >= 17 && opponent.CardsSum >= 17 &&
             participant.CardsSum == opponent.CardsSum)
         {
             GameResultPush();
+            return true;
         }
-
         else if (participant == Dealer && participant.CardsSum >= 17)
         {
             GameResult();
+            return true;
         }
+        return false;
     }
 
     private static void CheckBlackjack()
@@ -137,7 +142,6 @@ public static class GameManager
         {
             GameResult();
         }
-
     }
 
     /* Game Result Methods */
