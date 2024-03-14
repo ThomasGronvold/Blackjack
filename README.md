@@ -14,7 +14,11 @@ You can bet, hit, double and fold. The game does the rest.
 * Clone or download the Repo and run it in Visual Studio.
 
 ### To run the app in Windows:
-* WIP
+#### Windows might find the app unrecognized, click "More info" then "Run anyways"
+* Open the latest release [here](https://github.com/ThomasGronvold/Blackjack/releases)
+* Downlaod the "BlackjackWPF.zip".
+* Unzip the folder.
+* Launch "WPFBlackjack".
 
 ### (Optional) To use Random.org API for card shuffle:
 
