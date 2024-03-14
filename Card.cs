@@ -1,38 +1,20 @@
-﻿namespace WPFBlackjack;
+﻿using System;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
+namespace WPFBlackjack;
 
-public class Card
+public class Card(string suit, string value)
 {
-    private string Suit { get; }
-    public string FaceCardIdentity { get; private set; }
-    public int Value { get; private set; }
+    private string Suit { get; } = suit;
+    public string FaceCardIdentity { get; } = value;
+    public int Value { get; private set; } = GetCardIntValue(value);
 
-    public Card(string suit, string value)
+    private static int GetCardIntValue(string value)
     {
-        Suit = suit;
-        FaceCardIdentity = value;
-        Value = GetCardIntValue(value);
-    }
+        if (value == "A") return 11;
 
-    public static int GetCardIntValue(string value)
-    {
-        if (value == "A")
-        {
-            return 11;
-        }
+        if (value is "J" or "Q" or "K") return 10;
 
-        if (value is "J" or "Q" or "K")
-        {
-            return 10;
-        }
-
-        if (int.TryParse(value, out var result))
-        {
-            return result;
-        }
+        if (int.TryParse(value, out var result)) return result;
 
         throw new ArgumentException($"Invalid card value. Value: {value}");
     }

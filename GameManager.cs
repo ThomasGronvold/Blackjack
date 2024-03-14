@@ -1,76 +1,74 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Windows;
-using System.Windows.Documents;
-
+using System.Threading.Tasks;
 
 namespace WPFBlackjack;
 
 public static class GameManager
 {
-    private static MainWindow _mainWindow;
+    private static MainWindow? _mainWindow;
     private static readonly GameParticipant Dealer = new();
     private static readonly GameParticipant Player = new();
 
-    public static void Initialize(MainWindow mainWindow)
+    public static async Task Initialize(MainWindow mainWindow)
     {
         _mainWindow = mainWindow;
-        ResetGame();
+        await ResetGame();
         StartGame();
     }
-
+    
     /* Initialization Method */
 
-    private static void ResetGame()
+    private static async Task ResetGame()
     {
         Player.ResetParticipant();
         Dealer.ResetParticipant();
-        Deck.ShuffleDeck();
+        await Deck.ShuffleDeck();
     }
 
-    private static void StartGame()
+    private static async void StartGame()
     {
         // Player and Dealer is alternately dealt two cards each, starting with player
 
         // Player's First Card 
-        HitParticipant(shouldCheckWin: false);
+        await HitParticipantAsync(shouldCheckWin: false);
 
         // Dealer's first card (isDealer, starts facing down) 
-        HitParticipant(true, true, shouldCheckWin: false);
+        await HitParticipantAsync(true, true, shouldCheckWin: false);
 
         // Player's second card 
-        HitParticipant(shouldCheckWin: false);
+        await HitParticipantAsync(shouldCheckWin: false);
 
         // Dealer's second card (isDealer)
-        HitParticipant(true, shouldCheckWin: false);
+        await HitParticipantAsync(true, shouldCheckWin: false);
 
         CheckBlackjack();
     }
 
     /* Public Methods */
 
-    public static void HitParticipant(bool isDealer = false, bool isFaceDown = false, bool shouldCheckWin = true, bool isDouble = false)
+    public static async Task HitParticipantAsync(bool isDealer = false, bool isFaceDown = false, bool shouldCheckWin = true, bool isDouble = false)
     {
         var participant = isDealer ? Dealer : Player;
         var opponent = participant == Player ? Dealer : Player;
 
-        var newCard = Deck.GetNextCard();
+        var newCard = await Deck.GetNextCardAsync();
 
         participant.AddCard(newCard);
 
         var cardSum = isDealer && !shouldCheckWin ? newCard.Value : participant.CardsSum;
 
         /* The new card get added and displayed to the Window */
-        _mainWindow.DealCard(newCard, isDealer, isFaceDown, cardSum);
+        _mainWindow!.DealCard(newCard, isDealer, isFaceDown, cardSum);
 
         if (shouldCheckWin && !CheckGameOver(participant, opponent))
         {
             if (!isDealer && cardSum == 21 || isDouble)
             {
+                foreach (var card in Player._hand)
+                {
+                    Console.WriteLine($"{card.FaceCardIdentity} {card.Value}");
+                }
+         
                 _mainWindow.EndPlayerTurn();
             }
         }
@@ -78,7 +76,7 @@ public static class GameManager
 
     public static string GetDealerHiddenCard()
     {
-        _mainWindow.DealerCardCount.Text = $"{Dealer.CardsSum} Dealer";
+        _mainWindow!.DealerCardCount.Text = $"{Dealer.CardsSum} Dealer";
         return Dealer.DealerHiddenCard();
     }
 
@@ -95,19 +93,17 @@ public static class GameManager
             GameResultBust(opponentParticipantString, currentParticipantString);
             return true;
         }
-        else if (
+        if (
+            participant == Dealer &&
             participant.CardsSum >= 17 && opponent.CardsSum >= 17 &&
             participant.CardsSum == opponent.CardsSum)
         {
             GameResultPush();
             return true;
         }
-        else if (participant == Dealer && participant.CardsSum >= 17)
-        {
-            GameResult();
-            return true;
-        }
-        return false;
+        if (participant == Player || participant.CardsSum < 17) return false;
+        GameResult();
+        return true;
     }
 
     private static void CheckBlackjack()
@@ -117,7 +113,7 @@ public static class GameManager
         {
             GameResultPush();
         }
-        // Check for Blackjack in both Player and Dealer hands.
+        // Check for Blackjack in Player's and Dealer's hand.
         else if (Player.HasBlackjack())
         {
             GameResultBlackjack("Player");
@@ -128,14 +124,14 @@ public static class GameManager
         }
     }
 
-    public static void DealerTurn()
+    public static async void DealerTurn()
     {
-        // The dealers first card should be flipped, and the dealer cardValue should be updated
+        // Dealer draws cards until the sum of the hand is 17 or above.
         if (Dealer.CardsSum < 17)
         {
             while (Dealer.CardsSum < 17)
             {
-                HitParticipant(true);
+                await HitParticipantAsync(true);
             }
         }
         else
@@ -144,8 +140,7 @@ public static class GameManager
         }
     }
 
-    /* Game Result Methods */
-    /* Planned: document every type of win / loss and who won / lost in a database */
+    /* Private Methods */
 
     // Checks the cardSum of the player and dealer, the higher sum wins. 
     private static void GameResult()
@@ -156,29 +151,26 @@ public static class GameManager
         }
         else if (Player.CardsSum > Dealer.CardsSum)
         {
-            _mainWindow.GameResultScreen("Player", "The Player Won!");
+            _mainWindow!.GameResultScreen("Player", "The Player Won!");
         }
         else
         {
-            _mainWindow.GameResultScreen("Dealer", "The Dealer Won!");
+            _mainWindow!.GameResultScreen("Dealer", "The Dealer Won!");
         }
     }
 
     private static void GameResultPush()
     {
-        // Update database for tied games.
-        _mainWindow.GameResultScreen("Tie");
+        _mainWindow!.GameResultScreen("Tie");
     }
 
     private static void GameResultBlackjack(string whoWon)
     {
-        // Update database for Blackjack games, and on which side.
-        _mainWindow.GameResultScreen(whoWon, "Blackjack!");
+        _mainWindow!.GameResultScreen(whoWon, "Blackjack!");
     }
 
     private static void GameResultBust(string whoWon, string whoBusted)
     {
-        // Update database with games where there is a bust, and on which side.
-        _mainWindow.GameResultScreen(whoWon, $"{whoBusted} Busted.");
+        _mainWindow!.GameResultScreen(whoWon, $"{whoBusted} Busted.");
     }
 }

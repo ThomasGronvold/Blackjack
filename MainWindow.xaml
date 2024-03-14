@@ -23,7 +23,10 @@
     </Window.Resources>
 
 
-    <Grid Background="DarkGreen">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="Images/blackjackBackground.png" />
+        </Grid.Background>
         <!-- Game Grid -->
         <Grid Name="GameGrid" Visibility="Hidden">
             <Grid.RowDefinitions>
@@ -75,9 +78,7 @@
                     <TextBlock x:Name="BetAmount" Text="$0" FontSize="60" TextAlignment="Center"
                                VerticalAlignment="Center" Grid.Column="1" />
                 </Grid>
-
-                <!--<Button Content="Split" Grid.Column="2" Width="120" Height="70" FontSize="30" Margin="0 0 300 0" />-->
-
+          
                 <Button Content="Stand" Grid.Column="2" Width="120" Height="70" FontSize="30"
                         Click="StandButton_OnClick" />
             </Grid>
@@ -99,7 +100,6 @@
 
                 <Grid Column="1" Name="PlayerCardGrid">
                     <!-- Player's cards will be added here by the GameManager -->
-
                 </Grid>
 
                 <TextBlock
@@ -112,7 +112,7 @@
                            VerticalAlignment="Center" />
             </Grid>
 
-            <!-- Wil show when one of the participant wins -->
+            <!-- Will show when one of the participant wins -->
             <Grid Grid.Row="1" Grid.Column="0">
                 <TextBlock
                     Name="GameOverMainText"
@@ -144,22 +144,12 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Grid Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-
-                    <!--<Button Content="Split" Width="120" Height="70" FontSize="30" Margin="0 0 300 0" />-->
-
-                    <TextBlock x:Name="BetAmountBettingGrid" Text="$0" FontSize="60" TextAlignment="Center"
-                               VerticalAlignment="Center" Grid.Column="1" />
-                </Grid>
+                <TextBlock x:Name="BetAmountBettingGrid" Text="$0" FontSize="60" TextAlignment="Center"
+                           VerticalAlignment="Center" Grid.Column="1" />
             </Grid>
 
             <!-- Chips buttons -->
-            <Grid Grid.Row="2" Grid.Column="0">
-
+            <Grid Grid.Row="2" Grid.HorizontalAlignment="Center">
                 <Button Template="{StaticResource ImageButtonTemplate}" Click="BettingButton_OnClick" Tag="5">
                     <Image Source="Images/five.png" />
                 </Button>
@@ -183,10 +173,10 @@
                 <Button Template="{StaticResource ImageButtonTemplate}" Click="BettingButton_OnClick" Tag="1">
                     <Image Source="Images/deal_chip.png" Height="200" Margin="1000,0,0,0" />
                 </Button>
-
-                <TextBlock x:Name="BankAmountBettingGrid" Text="Bank: $1000" FontSize="60" VerticalAlignment="Bottom"
-                           Margin="20 0 0 0" />
             </Grid>
+
+            <TextBlock Grid.Row="2" x:Name="BankAmountBettingGrid" Text="Bank: $1000" FontSize="60" VerticalAlignment="Bottom"
+                       Margin="20 0 0 0" />
         </Grid>
     </Grid>
 

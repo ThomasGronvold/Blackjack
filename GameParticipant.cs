@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace WPFBlackjack;
 
 public class GameParticipant
 {
-    private readonly List<Card> _hand = new();
+    public readonly List<Card> _hand = new();
     public int CardsSum { get; private set; }
 
     /* Public Methods */
@@ -18,11 +17,11 @@ public class GameParticipant
         if (_hand.Count > 1)
         {
             /* After card has been added to the hand, the sum of all cards in the hand is calculated
-          And the CardsSum property is updated with the correct value */
+               and the CardsSum property is updated with the correct value */
             CalculateCardsSum();
 
             /* If the sum of CardsSum is over 21, and the participant has an Ace with the value 11,
-               the Ace will convert it's value into 1, to prevent the bust */
+               the Ace will convert its value into 1, to prevent the bust */
             AdjustAceValueIfBusted();
         }
     }

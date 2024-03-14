@@ -64,13 +64,11 @@ namespace WPFBlackjack
             // Blackjack win
             else if (whoWon == "Player" && result == "Blackjack!")
             {
-                Console.WriteLine("Blackjack");
                 _tempBankAmount += (int)(_tempPotAmount * 2.5);
             }
             // Normal win
             else if (whoWon == "Player")
             {
-                Console.WriteLine("Normal");
                 _tempBankAmount += _tempPotAmount * 2;
             }
 
@@ -99,7 +97,7 @@ namespace WPFBlackjack
                 : new BitmapImage(new Uri($"{imgUrl}", UriKind.Relative));
 
             // Create a new Image element
-            var random = new Random();
+            var random = new System.Random();
             var tilt = random.Next(-5, 5);
             var dynamicImage = new Image
             {
@@ -165,15 +163,15 @@ namespace WPFBlackjack
         }
 
         // Button clicks methods
-        private void HitButton_OnClick(object sender, RoutedEventArgs e)
+        private async void HitButton_OnClick(object sender, RoutedEventArgs e)
         {
             /* HitParticipant method adds a card and validates the state of the game,
              then calls the DealCard method here in window to show the card and update the (visual) value*/
-            GameManager.HitParticipant();
+            await GameManager.HitParticipantAsync();
             DoubleButton.IsEnabled = false;
         }
 
-        private void DoubleButton_OnClick(object sender, RoutedEventArgs e)
+        private async void DoubleButton_OnClick(object sender, RoutedEventArgs e)
         {
             /* Gives a user a card with the isDouble parameter which makes the GameManager know the player's turn is over */
             if (_tempBankAmount < _tempPotAmount) return;
@@ -184,7 +182,7 @@ namespace WPFBlackjack
 
             UpdateBankAndBetTextBlocks();
 
-            GameManager.HitParticipant(isDouble: true);
+            await GameManager.HitParticipantAsync(isDouble: true);
         }
 
         private void StandButton_OnClick(object sender, RoutedEventArgs e)
@@ -213,7 +211,7 @@ namespace WPFBlackjack
             ChangeActiveGrid();
         }
 
-        private void BettingButton_OnClick(object sender, RoutedEventArgs e)
+        private async void BettingButton_OnClick(object sender, RoutedEventArgs e)
         {
             Button chipClicked = (Button)sender;
             int chipValue = Convert.ToInt32(chipClicked.Tag);
@@ -230,7 +228,7 @@ namespace WPFBlackjack
                 // Game start, betting grid gets hidden, and game grids becomes visible.
                 ChangeActiveGrid();
 
-                GameManager.Initialize(this);
+                await GameManager.Initialize(this!);
             }
             else if (_tempBankAmount - chipValue >= 0)
             {

@@ -1,15 +1,13 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.JavaScript;
-
-namespace WPFBlackjack;
-
+﻿using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using System.Linq;
 
+namespace WPFBlackjack;
+
 public static class Deck
 {
-    private static List<Card> _cards;
+    private static readonly List<Card> Cards = [];
     private static int _nextCardIndex;
 
     static Deck()
@@ -19,51 +17,65 @@ public static class Deck
 
     private static void InitializeDeck()
     {
-        _cards = new List<Card>();
-
-        string[] suits = { "Hearts", "Diamonds", "Clubs", "Spades" };
+        string[] suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
         string[] values =
-        {
+        [
             "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"
-        };
+        ];
 
         var cardList =
             from suit in suits
             from value in values
             select new Card(suit, value);
 
-        _cards.AddRange(cardList);
+        Cards.AddRange(cardList);
 
-        ShuffleDeck();
+        /* The deck shuffle happens on GameManager initialization */
     }
 
-    public static void ShuffleDeck()
+    public static async Task ShuffleDeck()
     {
-        _cards.Where(c => c is { FaceCardIdentity: "A", Value: 1 })
+        var randomIntegers = await RandomInt.RandomOrderIntArrayApi();
+
+        var cardsCount = Cards.Count;
+
+        /* All aces that had their value changed to 1 wil change back to 11 */
+        Cards.Where(c => c is { FaceCardIdentity: "A", Value: 1 })
             .ToList()
             .ForEach(c => c.ChangeAceValue());
 
-        var n = _cards.Count;
-        Random rng = new();
-
-        while (n > 1)
+        if (randomIntegers != null)
         {
-            int k = rng.Next(n--);
-            (_cards[n], _cards[k]) = (_cards[k], _cards[n]);
-        }
+            while (cardsCount > 1)
+            {
+                int randomIndex = randomIntegers[cardsCount - 1] - 1;
 
-        _nextCardIndex = 0;
+                (Cards[cardsCount - 1], Cards[randomIndex]) = (Cards[randomIndex], Cards[cardsCount - 1]);
+                cardsCount--;
+            }
+        }
+        else
+        {
+            Random rng = new();
+
+            while (cardsCount > 1)
+            {
+                int randomInt = rng.Next(cardsCount--);
+                (Cards[cardsCount], Cards[randomInt]) = (Cards[randomInt], Cards[cardsCount]);
+            }
+        }
     }
 
-    public static Card GetNextCard()
+    public static async Task<Card> GetNextCardAsync()
     {
-        Card cardToReturn = _cards[_nextCardIndex];
-        _nextCardIndex++;
-
-        if (_nextCardIndex >= _cards.Count)
+        if (_nextCardIndex >= Cards.Count)
         {
-            ShuffleDeck();
+            await ShuffleDeck();
+            _nextCardIndex = 0;
         }
+
+        var cardToReturn = Cards[_nextCardIndex];
+        _nextCardIndex++;
 
         return cardToReturn;
     }
