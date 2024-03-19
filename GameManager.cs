@@ -64,11 +64,6 @@ public static class GameManager
         {
             if (!isDealer && cardSum == 21 || isDouble)
             {
-                foreach (var card in Player._hand)
-                {
-                    Console.WriteLine($"{card.FaceCardIdentity} {card.Value}");
-                }
-         
                 _mainWindow.EndPlayerTurn();
             }
         }
